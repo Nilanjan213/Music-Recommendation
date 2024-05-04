@@ -18,7 +18,6 @@ st.header("Emotion Based Music Recommender")
 
 if "run" not in st.session_state:
 	st.session_state["run"] = "true"
-
 try:
 	emotion = np.load("emotion.npy")[0]
 except:
@@ -32,14 +31,9 @@ else:
 class EmotionProcessor:
 	def recv(self, frame):
 		frm = frame.to_ndarray(format="bgr24")
-
-		##############################
 		frm = cv2.flip(frm, 1)
-
 		res = holis.process(cv2.cvtColor(frm, cv2.COLOR_BGR2RGB))
-
 		lst = []
-
 		if res.face_landmarks:
 			for i in res.face_landmarks.landmark:
 				lst.append(i.x - res.face_landmarks.landmark[1].x)
@@ -62,35 +56,24 @@ class EmotionProcessor:
 					lst.append(0.0)
 
 			lst = np.array(lst).reshape(1,-1)
-
 			pred = label[np.argmax(model.predict(lst))]
-
 			print(pred)
 			cv2.putText(frm, pred, (50,50),cv2.FONT_ITALIC, 1, (255,0,0),2)
-
 			np.save("emotion.npy", np.array([pred]))
 
 			
-		drawing.draw_landmarks(frm, res.face_landmarks, holistic.FACEMESH_TESSELATION,
-								landmark_drawing_spec=drawing.DrawingSpec(color=(0,0,255), thickness=-1, circle_radius=1),
-								connection_drawing_spec=drawing.DrawingSpec(thickness=1))
+		drawing.draw_landmarks(frm, res.face_landmarks, holistic.FACEMESH_TESSELATION,landmark_drawing_spec=drawing.DrawingSpec(color=(0,0,255), thickness=-1, circle_radius=1),connection_drawing_spec=drawing.DrawingSpec(thickness=1))
 		drawing.draw_landmarks(frm, res.left_hand_landmarks, hands.HAND_CONNECTIONS)
 		drawing.draw_landmarks(frm, res.right_hand_landmarks, hands.HAND_CONNECTIONS)
-
-
-		##############################
 
 		return av.VideoFrame.from_ndarray(frm, format="bgr24")
 
 lang = st.text_input("Language")
 singer = st.text_input("singer")
-
 if lang and singer and st.session_state["run"] != "false":
 	webrtc_streamer(key="key", desired_playing_state=True,
 				video_processor_factory=EmotionProcessor)
-
 btn = st.button("Recommend me songs")
-
 if btn:
 	if not(emotion):
 		st.warning("Please let me capture your emotion first")
