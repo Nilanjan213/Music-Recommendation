@@ -2,13 +2,11 @@ import os
 import numpy as np 
 import cv2 
 from tensorflow.keras.utils import to_categorical
-
 from keras.layers import Input, Dense 
 from keras.models import Model
  
 is_init = False
 size = -1
-
 label = []
 dictionary = {}
 c = 0
@@ -33,10 +31,7 @@ for i in range(y.shape[0]):
 	y[i, 0] = dictionary[y[i, 0]]
 y = np.array(y, dtype="int32")
 
-###  hello = 0 nope = 1 ---> [1,0] ... [0,1]
-
 y = to_categorical(y)
-
 X_new = X.copy()
 y_new = y.copy()
 counter = 0 
@@ -51,18 +46,11 @@ for i in cnt:
 
 
 ip = Input(shape=(X.shape[1]))
-
 m = Dense(512, activation="relu")(ip)
 m = Dense(256, activation="relu")(m)
-
 op = Dense(y.shape[1], activation="softmax")(m) 
-
 model = Model(inputs=ip, outputs=op)
-
 model.compile(optimizer='rmsprop', loss="categorical_crossentropy", metrics=['acc'])
-
 model.fit(X, y, epochs=50)
-
-
 model.save("model.h5")
 np.save("labels.npy", np.array(label))
