@@ -34,4 +34,4 @@ The project consists of three main components:
 
 4. Run the music script to recommend music based on language and singer preference:
 
-   python music.py
+   streamlit run music.py
